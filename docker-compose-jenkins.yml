@@ -1,0 +1,44 @@
+version: '3.8'
+
+services:
+  web:
+    build: .
+    container_name: notes_app_web
+    ports:
+      - "8001:8000" # Changed from 8000:8000
+    environment:
+      - DJANGO_SECRET_KEY=${DJANGO_SECRET_KEY:-your_secure_secret_key}
+      - DJANGO_DEBUG=${DJANGO_DEBUG:-False}
+      - DB_NAME=notes_db
+      - DB_USER=postgres
+      - DB_PASSWORD=your_password
+      - DB_HOST=db
+      - DB_PORT=5432
+    depends_on:
+      - db
+    volumes:
+      - code_volume:/app/backend # Named volume for code
+      - static-files:/app/backend/staticfiles
+    networks:
+      - app-network
+
+  db:
+    image: postgres:13
+    container_name: notes_app_db
+    environment:
+      - POSTGRES_DB=notes_db
+      - POSTGRES_USER=postgres
+      - POSTGRES_PASSWORD=your_password
+    volumes:
+      - db-data:/var/lib/postgresql/data
+    networks:
+      - app-network
+
+volumes:
+  code_volume: # Added for code
+  db-data:
+  static-files:
+
+networks:
+  app-network:
+    driver: bridge
